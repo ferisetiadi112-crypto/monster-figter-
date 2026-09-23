@@ -33,6 +33,16 @@ function MonsterSchema.newIdentity(monsterId, species, gender, core)
     XP = 0,
     Bond = 0,
 
+    Care = {
+      Food = 100,
+      Water = 100,
+      LastCareUpdate = timestamp,
+    },
+    Companion = {
+      Mode = "Stored",
+      HomeId = "Home",
+    },
+
     BreedingCount = 0,
     Skills = {},
     Traits = {},
