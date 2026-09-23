@@ -9,6 +9,7 @@ local SnapshotService = require(script.Parent.SnapshotService)
 
 local PersistenceService = {}
 local loaded = {}
+local AUTOSAVE_SECONDS = 60
 
 function PersistenceService:PlayerAdded(player)
   local userId = player.UserId
@@ -27,6 +28,8 @@ function PersistenceService:PlayerAdded(player)
   end
 
   loaded[userId] = data
+  MonsterService:Hydrate(data.Monsters)
+  EggService:Hydrate(data.Eggs)
   return true, data
 end
 
@@ -66,6 +69,15 @@ end
 
 Players.PlayerAdded:Connect(function(player)
   PersistenceService:PlayerAdded(player)
+end)
+
+task.spawn(function()
+  while true do
+    task.wait(AUTOSAVE_SECONDS)
+    for _, player in ipairs(Players:GetPlayers()) do
+      PersistenceService:Save(player)
+    end
+  end
 end)
 
 Players.PlayerRemoving:Connect(function(player)
