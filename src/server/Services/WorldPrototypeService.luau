@@ -52,6 +52,15 @@ function WorldPrototype:EnsureWorld()
   local ground = part(folder, "PrototypeGround", Vector3.new(180, 1, 180), Color3.fromRGB(82, 145, 75), CFrame.new(0, -0.5, 0))
   ground.CanCollide = true
 
+  local dummy = Instance.new("Part")
+  dummy.Name = "TrainingDummySpawn"
+  dummy.Anchored = true
+  dummy.CanCollide = false
+  dummy.Transparency = 1
+  dummy.Size = Vector3.new(1, 1, 1)
+  dummy.Position = Vector3.new(0, 1, -12)
+  dummy.Parent = folder
+
   for i = 1, 8 do
     local angle = (i / 8) * math.pi * 2
     local x, z = math.cos(angle) * 55, math.sin(angle) * 55
