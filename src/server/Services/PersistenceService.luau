@@ -6,6 +6,8 @@ local PopulationService = require(script.Parent.PopulationService)
 local MonsterService = require(script.Parent.MonsterService)
 local EggService = require(script.Parent.EggService)
 local SnapshotService = require(script.Parent.SnapshotService)
+local HomeService = require(script.Parent.HomeService)
+local CompanionService = require(script.Parent.CompanionService)
 
 local PersistenceService = {}
 local loaded = {}
@@ -30,6 +32,7 @@ function PersistenceService:PlayerAdded(player)
   loaded[userId] = data
   MonsterService:Hydrate(data.Monsters)
   EggService:Hydrate(data.Eggs)
+  HomeService:Hydrate(player, data.Home)
   return true, data
 end
 
@@ -47,7 +50,7 @@ function PersistenceService:Save(player)
 
   snapshot.Coins = stored.Coins or 0
   snapshot.Diamonds = stored.Diamonds or 0
-  snapshot.Home = stored.Home or {}
+  snapshot.Home = HomeService:Get(player) or stored.Home or {}
 
   local success, reason = DataStoreRepository:Save(player.UserId, snapshot)
   if success then
@@ -60,6 +63,8 @@ end
 function PersistenceService:PlayerRemoving(player)
   self:Save(player)
   loaded[player.UserId] = nil
+  CompanionService:Cleanup(player)
+  HomeService:Cleanup(player)
   SessionService:Release(player.UserId)
 end
 
