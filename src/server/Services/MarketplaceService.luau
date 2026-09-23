@@ -5,6 +5,7 @@ local MonsterSchema = require(ReplicatedStorage.Shared.MonsterSchema)
 local TransactionService = require(script.Parent.TransactionService)
 local EconomyService = require(script.Parent.EconomyService)
 local SettlementJournal = require(script.Parent.SettlementJournal)
+local MonsterService = require(script.Parent.MonsterService)
 
 local MarketplaceService = {}
 local listings = {}
@@ -14,7 +15,6 @@ local function newListingId()
 end
 
 function MarketplaceService:CreateListing(seller, monster, saleType, price, minimumBid)
-  -- MonsterService must separately persist the Marketplace status when this listing is accepted.
   if not seller or not monster or monster.OwnerUserId ~= seller.UserId then
     return false, "NotOwner"
   end
@@ -29,6 +29,11 @@ function MarketplaceService:CreateListing(seller, monster, saleType, price, mini
   local minimum = math.floor(tonumber(minimumBid) or asking)
   if asking <= 0 or minimum <= 0 then
     return false, "InvalidPrice"
+  end
+
+  local locked, lockReason = MonsterService:LockForMarketplace(monster.MonsterID)
+  if not locked then
+    return false, lockReason
   end
 
   local id = newListingId()
@@ -79,6 +84,8 @@ function MarketplaceService:CancelListing(seller, listingId)
   if not listing then return false, "NotFound" end
   if listing.SellerUserId ~= seller.UserId then return false, "NotOwner" end
   if listing.Status ~= "Active" then return false, "NotActive" end
+  local released, releaseReason = MonsterService:ReleaseFromMarketplace(listing.MonsterId, seller.UserId)
+  if not released then return false, releaseReason end
   listing.Status = "Cancelled"
   return true, table.clone(listing)
 end
@@ -109,6 +116,12 @@ function MarketplaceService:BuyNett(buyer, listingId)
   local credited, creditReason = EconomyService:CreditCoins(listing.SellerUserId, listing.Price, sellerTx)
   if not credited then
     SettlementJournal:Fail(settlementId, creditReason)
+    return false, "SettlementPendingRecovery"
+  end
+
+  local transferred, transferReason = MonsterService:TransferMarketplaceOwnership(listing.MonsterId, buyer.UserId)
+  if not transferred then
+    SettlementJournal:Fail(settlementId, transferReason)
     return false, "SettlementPendingRecovery"
   end
 
