@@ -8,6 +8,7 @@ MonsterSchema.Status = {
   FALLEN = "Fallen",
   RESERVE = "Reserve",
   STARTER_HOLD = "StarterHold",
+  MARKETPLACE = "Marketplace",
 }
 
 function MonsterSchema.newIdentity(monsterId, species, gender, core)
