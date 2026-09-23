@@ -18,11 +18,12 @@ combatRemote.Name = "CombatAction"
 combatRemote.Parent = remotes
 
 combatRemote.OnServerEvent:Connect(function(player, action)
-  local valid, reason = CombatService:ValidateAction(player, action)
+  local valid, result = CombatService:ValidateAction(player, action)
   combatRemote:FireClient(player, {
     Accepted = valid,
     Action = type(action) == "table" and action.Type or nil,
-    Reason = reason,
+    Reason = valid and nil or result,
+    State = valid and result or nil,
     ServerTime = os.clock(),
   })
 end)
