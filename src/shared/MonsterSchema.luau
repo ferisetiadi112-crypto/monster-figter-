@@ -32,6 +32,12 @@ function MonsterSchema.newIdentity(monsterId, species, gender, core)
     Level = 1,
     XP = 0,
     Bond = 0,
+    Stats = {
+      Power = 10,
+      Defense = 10,
+      Speed = 16,
+      MaxHealth = 100,
+    },
 
     Care = {
       Food = 100,
