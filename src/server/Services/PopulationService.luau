@@ -93,6 +93,42 @@ function PopulationService:TransferWildToOwned(locationId)
   return true
 end
 
+function PopulationService:CanMaterializeOwned()
+  return self:GetUsedPopulation() < state.Capacity
+end
+
+function PopulationService:AddOwned()
+  if not self:CanMaterializeOwned() then
+    return false
+  end
+  state.OwnedCount += 1
+  return true
+end
+
+function PopulationService:RemoveOwned()
+  if state.OwnedCount <= 0 then
+    return false
+  end
+  state.OwnedCount -= 1
+  return true
+end
+
+function PopulationService:MoveToReserve()
+  if self:GetAvailableCapacity() <= 0 then
+    return false
+  end
+  state.ReserveCount += 1
+  return true
+end
+
+function PopulationService:ConsumeReserve()
+  if state.ReserveCount <= 0 then
+    return false
+  end
+  state.ReserveCount -= 1
+  return true
+end
+
 function PopulationService:CreateStarterHold()
   if state.StarterHoldCount >= state.AccountCount then
     return false
