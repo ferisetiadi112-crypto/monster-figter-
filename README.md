@@ -2,6 +2,10 @@
 
 > Build. Train. Evolve. Fight. Become a Legend.
 
+### Visual Production Pipeline v0.1
+
+Benchmark visual data is now defined in `src/shared/MonsterVisualConfig.luau`, with Blender production guidance in `docs/BLENDER_MONSTER_PIPELINE_V0_1.md`. Pyroxi is the first asset benchmark, followed by Aquavi and Florune.
+
 ### Monster Design System v0.1
 
 The visual production standard is documented in `docs/MONSTER_DESIGN_SYSTEM_V0_1.md`. The first benchmark set is Pyroxi, Aquavi, and Florune. Production expansion to 20–30 species should wait until these three establish the visual, animation, performance, and collectibility benchmark.
