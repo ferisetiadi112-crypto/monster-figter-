@@ -5,6 +5,7 @@ local shared = ReplicatedStorage:WaitForChild("Shared")
 local Constants = require(shared:WaitForChild("Constants"))
 local CombatService = require(script.Parent.Services.CombatService)
 local PlayerLifecycleService = require(script.Parent.Services.PlayerLifecycleService)
+local PersistenceService = require(script.Parent.Services.PersistenceService)
 
 local remotes = ReplicatedStorage:FindFirstChild("MonsterFighterRemotes") or Instance.new("Folder")
 remotes.Name = "MonsterFighterRemotes"
@@ -26,9 +27,11 @@ end)
 
 for _, player in ipairs(Players:GetPlayers()) do
   PlayerLifecycleService:PlayerAdded(player)
+  PersistenceService:PlayerAdded(player)
 end
 
 Players.PlayerRemoving:Connect(function(player)
+  PersistenceService:PlayerRemoving(player)
   CombatService:CleanupPlayer(player)
 end)
 
