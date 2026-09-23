@@ -25,6 +25,14 @@ function TransactionService:Begin(userId, transactionId)
   return true
 end
 
+function TransactionService:Abort(userId, transactionId)
+  if not seen[userId] or not seen[userId][transactionId] then
+    return false, "TransactionNotFound"
+  end
+  seen[userId][transactionId] = nil
+  return true
+end
+
 function TransactionService:Complete(userId, transactionId)
   if not seen[userId] or not seen[userId][transactionId] then
     return false, "TransactionNotFound"
