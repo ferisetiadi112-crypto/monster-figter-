@@ -7,6 +7,7 @@ local Constants = require(shared:WaitForChild("Constants"))
 local CombatService = require(script.Parent.Services.CombatService)
 local PlayerLifecycleService = require(script.Parent.Services.PlayerLifecycleService)
 local PersistenceService = require(script.Parent.Services.PersistenceService)
+local CombatConfig = require(shared:WaitForChild("CombatConfig"))
 
 local remotes = ReplicatedStorage:FindFirstChild("MonsterFighterRemotes") or Instance.new("Folder")
 remotes.Name = "MonsterFighterRemotes"
@@ -48,4 +49,17 @@ game:BindToClose(function()
   task.wait(2)
 end)
 
-print("[MonsterFighter] Server booted:", Constants.GameName, Constants.Version)
+task.spawn(function()
+  local last = os.clock()
+  while true do
+    task.wait(0.1)
+    local current = os.clock()
+    local delta = current - last
+    last = current
+    for _, player in ipairs(Players:GetPlayers()) do
+      CombatService:Regenerate(player, delta)
+    end
+  end
+end)
+
+print("[MonsterFighter] Server booted:", Constants.GameName, Constants.Version, "Combat:", CombatConfig.DefaultStats.MaxHealth)
