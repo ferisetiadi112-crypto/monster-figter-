@@ -87,6 +87,40 @@ function MonsterService:ClearOwnedForPlayer(userId)
   end
 end
 
+function MonsterService:LockForMarketplace(monsterId)
+  local monster = monsters[monsterId]
+  if not monster or monster.Status ~= MonsterSchema.Status.OWNED then
+    return false, "NotAvailable"
+  end
+  monster.Status = MonsterSchema.Status.MARKETPLACE
+  monster.UpdatedAt = os.time()
+  return true, self:Get(monsterId)
+end
+
+function MonsterService:ReleaseFromMarketplace(monsterId, ownerUserId)
+  local monster = monsters[monsterId]
+  if not monster or monster.Status ~= MonsterSchema.Status.MARKETPLACE then
+    return false, "NotMarketplaceLocked"
+  end
+  if ownerUserId and monster.OwnerUserId ~= ownerUserId then
+    return false, "NotOwner"
+  end
+  monster.Status = MonsterSchema.Status.OWNED
+  monster.UpdatedAt = os.time()
+  return true, self:Get(monsterId)
+end
+
+function MonsterService:TransferMarketplaceOwnership(monsterId, buyerUserId)
+  local monster = monsters[monsterId]
+  if not monster or monster.Status ~= MonsterSchema.Status.MARKETPLACE then
+    return false, "NotMarketplaceLocked"
+  end
+  monster.OwnerUserId = buyerUserId
+  monster.Status = MonsterSchema.Status.OWNED
+  monster.UpdatedAt = os.time()
+  return true, self:Get(monsterId)
+end
+
 function MonsterService:Capture(player, monsterId)
   if not player or not monsterId then
     return false, "InvalidRequest"
