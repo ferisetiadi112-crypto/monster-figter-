@@ -8,6 +8,7 @@ local CombatService = require(script.Parent.Services.CombatService)
 local PlayerLifecycleService = require(script.Parent.Services.PlayerLifecycleService)
 local PersistenceService = require(script.Parent.Services.PersistenceService)
 local CombatConfig = require(shared:WaitForChild("CombatConfig"))
+local WorldPrototypeService = require(script.Parent.Services.WorldPrototypeService)
 
 local remotes = ReplicatedStorage:FindFirstChild("MonsterFighterRemotes") or Instance.new("Folder")
 remotes.Name = "MonsterFighterRemotes"
@@ -31,10 +32,16 @@ end)
 for _, player in ipairs(Players:GetPlayers()) do
   PlayerLifecycleService:PlayerAdded(player)
   PersistenceService:PlayerAdded(player)
+  task.spawn(function() WorldPrototypeService:PlayerAdded(player) end)
 end
+
+Players.PlayerAdded:Connect(function(player)
+  task.spawn(function() WorldPrototypeService:PlayerAdded(player) end)
+end)
 
 Players.PlayerRemoving:Connect(function(player)
   PersistenceService:PlayerRemoving(player)
+  WorldPrototypeService:PlayerRemoving(player)
   CombatService:CleanupPlayer(player)
 end)
 
