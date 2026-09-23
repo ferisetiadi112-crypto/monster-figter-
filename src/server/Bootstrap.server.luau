@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local shared = ReplicatedStorage:WaitForChild("Shared")
 local Constants = require(shared:WaitForChild("Constants"))
@@ -33,6 +34,18 @@ end
 Players.PlayerRemoving:Connect(function(player)
   PersistenceService:PlayerRemoving(player)
   CombatService:CleanupPlayer(player)
+end)
+
+game:BindToClose(function()
+  if RunService:IsStudio() then
+    task.wait(1)
+  end
+
+  for _, player in ipairs(Players:GetPlayers()) do
+    PersistenceService:Save(player)
+  end
+
+  task.wait(2)
 end)
 
 print("[MonsterFighter] Server booted:", Constants.GameName, Constants.Version)
