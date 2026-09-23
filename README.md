@@ -284,7 +284,7 @@ This repository is a Rojo-friendly Roblox/Luau foundation. The current pre-Studi
 
 **Milestone 4 Monster Engine:** identity, species, age, status, ownership, population limits, capture rules, genetics and legacy foundations are implemented.
 
-**Not implemented yet:** persistent DataStore repository, global cross-server population coordination, egg/incubator state machine, actual breeding transaction, reincarnation transaction, 3D monster models, world spawning visuals, home/habitat, Arena matchmaking, belts, marketplace and monetization.
+**Not implemented yet:** production DataStore session/locking layer, global cross-server population coordination, population-gated egg hatch materialization, full reincarnation transaction, 3D monster models, world spawning visuals, home/habitat, Arena matchmaking, belts, marketplace and monetization.
 
 The next pre-Studio objective is to finish the server domain layer and persistence interfaces so Roblox Studio becomes an integration/build step rather than the place where core rules are invented.
 Platform: Roblox.
