@@ -2,6 +2,27 @@
 
 > Build. Train. Evolve. Fight. Become a Legend.
 
+### Studio Prototype v0.2 — First Playable Combat
+
+The first combat vertical slice is now prepared:
+- server-side training dummy with health state;
+- server-authoritative prototype Attack damage;
+- attack range and cooldown validation;
+- prototype HUD with target HP bar;
+- damage feedback in the HUD;
+- existing PC/mobile action bindings remain available;
+- Pyroxi companion and prototype world remain active.
+
+Studio testing target:
+1. Player spawns in the prototype world.
+2. Pyroxi appears and follows the player.
+3. Training Dummy appears ahead.
+4. Attack within range reduces dummy HP.
+5. HUD displays target HP and damage feedback.
+6. Out-of-range and cooldown attacks are rejected server-side.
+
+The next step after successful Studio verification is authored 3D rigs + animation + hitbox timing, not more backend expansion.
+
 ### Studio Prototype v0.1
 
 The project now includes the first playable 3D prototype layer for Roblox Studio:
