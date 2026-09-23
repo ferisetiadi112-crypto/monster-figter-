@@ -43,7 +43,10 @@ function MonsterService:CreateWild(species, gender, core, locationId)
   monster.LocationId = locationId
 
   monsters[monster.MonsterID] = monster
-  if not PopulationService:RegisterWild(locationId) then\n    return nil, "WildSlotUnavailable"\n  end
+  if not PopulationService:RegisterWild(locationId) then
+    monsters[monster.MonsterID] = nil
+    return nil, "WildSlotUnavailable"
+  end
 
   return table.clone(monster)
 end
@@ -65,6 +68,22 @@ function MonsterService:GetAll()
     table.insert(result, self:Get(monsterId))
   end
   return result
+end
+
+function MonsterService:Hydrate(records)
+  for _, record in ipairs(records or {}) do
+    if type(record) == "table" and type(record.MonsterID) == "string" then
+      monsters[record.MonsterID] = table.clone(record)
+    end
+  end
+end
+
+function MonsterService:ClearOwnedForPlayer(userId)
+  for id, monster in pairs(monsters) do
+    if monster.OwnerUserId == userId then
+      monsters[id] = nil
+    end
+  end
 end
 
 function MonsterService:Capture(player, monsterId)
