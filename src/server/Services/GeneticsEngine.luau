@@ -74,6 +74,8 @@ function GeneticsEngine:BuildOffspringGenes(parentA, parentB, seed)
   end
 
   return {
+    Species = chooseDeterministic(parentA.Species, parentB.Species, selector),
+    Gender = selector % 2 == 0 and "Male" or "Female",
     Core = core,
     Traits = inheritedTraits,
     Skills = inheritedSkills,
