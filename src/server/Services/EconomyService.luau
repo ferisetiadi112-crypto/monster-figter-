@@ -1,5 +1,3 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local TransactionService = require(script.Parent.TransactionService)
 
 local EconomyService = {}
@@ -37,6 +35,7 @@ function EconomyService:DebitCoins(userId, amount, transactionId)
 
   balances[userId] = balances[userId] or {Coins = 0, Diamonds = 0}
   if balances[userId].Coins < amount then
+    TransactionService:Abort(userId, transactionId)
     return false, "InsufficientCoins"
   end
 
