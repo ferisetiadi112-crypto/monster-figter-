@@ -85,6 +85,14 @@ function PopulationService:ReleaseWild(locationId)
   return true
 end
 
+function PopulationService:TransferWildToOwned(locationId)
+  if not self:ReleaseWild(locationId) then
+    return false
+  end
+  state.OwnedCount += 1
+  return true
+end
+
 function PopulationService:CreateStarterHold()
   if state.StarterHoldCount >= state.AccountCount then
     return false
