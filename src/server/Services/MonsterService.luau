@@ -237,6 +237,29 @@ function MonsterService:MaterializeFromEgg(player, egg)
   return self:Get(monster.MonsterID)
 end
 
+function MonsterService:RecordBattle(monsterId, won, arenaWin)
+  local monster = monsters[monsterId]
+  if not monster then
+    return false, "NotFound"
+  end
+
+  monster.BattleHistory = monster.BattleHistory or {
+    Battles = 0,
+    Wins = 0,
+    ArenaWins = 0,
+  }
+
+  monster.BattleHistory.Battles += 1
+  if won then
+    monster.BattleHistory.Wins += 1
+    if arenaWin then
+      monster.BattleHistory.ArenaWins += 1
+    end
+  end
+  monster.UpdatedAt = os.time()
+  return true, self:Get(monsterId)
+end
+
 function MonsterService:RecordFallen(monsterId, reason)
   local monster = monsters[monsterId]
   if not monster then
