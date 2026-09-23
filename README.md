@@ -2,6 +2,10 @@
 
 > Build. Train. Evolve. Fight. Become a Legend.
 
+### Pyroxi Blender Blockout
+
+A first procedural Blender blockout generator is available at `tools/blender/pyroxi_blockout.py`. It creates an original Pyroxi base creature, simple materials, silhouette, face, ears, ember tail, preview camera, and lighting. It is intentionally a starting mesh for later sculpting, topology cleanup, rigging, and animation.
+
 ### Visual Production Pipeline v0.1
 
 Benchmark visual data is now defined in `src/shared/MonsterVisualConfig.luau`, with Blender production guidance in `docs/BLENDER_MONSTER_PIPELINE_V0_1.md`. Pyroxi is the first asset benchmark, followed by Aquavi and Florune.
