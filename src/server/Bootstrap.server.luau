@@ -9,16 +9,33 @@ local PlayerLifecycleService = require(script.Parent.Services.PlayerLifecycleSer
 local PersistenceService = require(script.Parent.Services.PersistenceService)
 local CombatConfig = require(shared:WaitForChild("CombatConfig"))
 local WorldPrototypeService = require(script.Parent.Services.WorldPrototypeService)
+local PrototypeCombatService = require(script.Parent.Services.PrototypeCombatService)
 
 local remotes = ReplicatedStorage:FindFirstChild("MonsterFighterRemotes") or Instance.new("Folder")
 remotes.Name = "MonsterFighterRemotes"
 remotes.Parent = ReplicatedStorage
+
+WorldPrototypeService:EnsureWorld()
+PrototypeCombatService:CreateDummy()
 
 local combatRemote = remotes:FindFirstChild("CombatAction") or Instance.new("RemoteEvent")
 combatRemote.Name = "CombatAction"
 combatRemote.Parent = remotes
 
 combatRemote.OnServerEvent:Connect(function(player, action)
+  if type(action) == "table" and action.Type and string.match(action.Type, "^Attack$") then
+    local protoOk, protoResult = PrototypeCombatService:Attack(player, action.Type)
+    if protoOk then
+      combatRemote:FireClient(player, {
+        Accepted = true,
+        Action = action.Type,
+        PrototypeCombat = protoResult,
+        ServerTime = os.clock(),
+      })
+      return
+    end
+  end
+
   local valid, result = CombatService:ValidateAction(player, action)
   combatRemote:FireClient(player, {
     Accepted = valid,
@@ -42,6 +59,7 @@ end)
 Players.PlayerRemoving:Connect(function(player)
   PersistenceService:PlayerRemoving(player)
   WorldPrototypeService:PlayerRemoving(player)
+  PrototypeCombatService:Cleanup(player)
   CombatService:CleanupPlayer(player)
 end)
 
