@@ -51,6 +51,22 @@ function EggService:Get(eggId)
   return egg and table.clone(egg) or nil
 end
 
+function EggService:Hatch(eggId)
+  local egg = eggs[eggId]
+  if not egg then
+    return nil, "NotFound"
+  end
+
+  self:Refresh(eggId)
+  if egg.Status ~= "Ready" then
+    return nil, "NotReady"
+  end
+
+  egg.Status = "Hatched"
+  egg.HatchedAt = os.time()
+  return table.clone(egg)
+end
+
 function EggService:GetAll()
   local result = {}
   for _, egg in pairs(eggs) do
