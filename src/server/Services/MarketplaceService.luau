@@ -4,6 +4,7 @@ local HttpService = game:GetService("HttpService")
 local MonsterSchema = require(ReplicatedStorage.Shared.MonsterSchema)
 local TransactionService = require(script.Parent.TransactionService)
 local EconomyService = require(script.Parent.EconomyService)
+local SettlementJournal = require(script.Parent.SettlementJournal)
 
 local MarketplaceService = {}
 local listings = {}
@@ -13,6 +14,7 @@ local function newListingId()
 end
 
 function MarketplaceService:CreateListing(seller, monster, saleType, price, minimumBid)
+  -- MonsterService must separately persist the Marketplace status when this listing is accepted.
   if not seller or not monster or monster.OwnerUserId ~= seller.UserId then
     return false, "NotOwner"
   end
@@ -87,14 +89,35 @@ function MarketplaceService:BuyNett(buyer, listingId)
   if listing.SaleType ~= "NETT" then return false, "NotNettSale" end
   if listing.SellerUserId == buyer.UserId then return false, "SelfPurchase" end
 
-  local tx = TransactionService:NewId("MKT")
-  local debited, reason = EconomyService:DebitCoins(buyer.UserId, listing.Price, tx)
-  if not debited then return false, reason end
+  local settlementId = SettlementJournal:Create("Marketplace", {
+    ListingId = listing.ListingId,
+    SellerUserId = listing.SellerUserId,
+    BuyerUserId = buyer.UserId,
+    MonsterId = listing.MonsterId,
+    Amount = listing.Price,
+  })
+
+  local buyerTx = TransactionService:NewId("MKT")
+  local sellerTx = TransactionService:NewId("MKT")
+
+  local debited, reason = EconomyService:DebitCoins(buyer.UserId, listing.Price, buyerTx)
+  if not debited then
+    SettlementJournal:Fail(settlementId, reason)
+    return false, reason
+  end
+
+  local credited, creditReason = EconomyService:CreditCoins(listing.SellerUserId, listing.Price, sellerTx)
+  if not credited then
+    SettlementJournal:Fail(settlementId, creditReason)
+    return false, "SettlementPendingRecovery"
+  end
 
   listing.Status = "Sold"
   listing.BuyerUserId = buyer.UserId
   listing.SoldAt = os.time()
-  listing.TransactionId = tx
+  listing.TransactionId = buyerTx
+  listing.SettlementId = settlementId
+  SettlementJournal:Complete(settlementId)
 
   return true, table.clone(listing)
 end
