@@ -113,6 +113,29 @@ function MonsterService:Capture(player, monsterId)
   return true, self:Get(monsterId)
 end
 
+function MonsterService:SetCare(monsterId, food, water)
+  local monster = monsters[monsterId]
+  if not monster then
+    return false, "NotFound"
+  end
+
+  monster.Care = monster.Care or {
+    Food = 100,
+    Water = 100,
+    LastCareUpdate = os.time(),
+  }
+
+  if type(food) == "number" then
+    monster.Care.Food = math.clamp(food, 0, 100)
+  end
+  if type(water) == "number" then
+    monster.Care.Water = math.clamp(water, 0, 100)
+  end
+  monster.Care.LastCareUpdate = os.time()
+  monster.UpdatedAt = os.time()
+  return true, self:Get(monsterId)
+end
+
 function MonsterService:SetStatus(monsterId, status)
   local monster = monsters[monsterId]
   if not monster then
@@ -228,6 +251,15 @@ function MonsterService:IncrementBreedingCount(monsterId)
 end
 
 function MonsterService:CanTrain(monsterId)
+  local monster = monsters[monsterId]
+  if not monster then
+    return false
+  end
+  local care = monster.Care or {Food = 100, Water = 100}
+  return care.Food >= 20 and care.Water >= 20 and monster.AgeDays >= Constants.Lifecycle.TrainingAgeDays
+end
+
+function MonsterService:CanTrainLegacy(monsterId)
   local monster = monsters[monsterId]
   return monster ~= nil and monster.AgeDays >= Constants.Lifecycle.TrainingAgeDays
 end
