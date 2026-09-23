@@ -256,22 +256,23 @@ function MonsterService:CanTrain(monsterId)
     return false
   end
   local care = monster.Care or {Food = 100, Water = 100}
-  return care.Food >= 20 and care.Water >= 20 and monster.AgeDays >= Constants.Lifecycle.TrainingAgeDays
-end
-
-function MonsterService:CanTrainLegacy(monsterId)
-  local monster = monsters[monsterId]
-  return monster ~= nil and monster.AgeDays >= Constants.Lifecycle.TrainingAgeDays
+  local ageDays = math.max(0, math.floor((os.time() - monster.BirthTimestamp) / 86400))
+  return care.Food >= 20 and care.Water >= 20 and ageDays >= Constants.Lifecycle.TrainingAgeDays
 end
 
 function MonsterService:CanBattle(monsterId)
   local monster = monsters[monsterId]
-  return monster ~= nil and monster.AgeDays >= Constants.Lifecycle.BattleAgeDays
+  if not monster then
+    return false
+  end
+  local ageDays = math.max(0, math.floor((os.time() - monster.BirthTimestamp) / 86400))
+  return ageDays >= Constants.Lifecycle.BattleAgeDays
 end
 
 function MonsterService:CanBreed(monsterId)
   local monster = monsters[monsterId]
-  if not monster or monster.AgeDays < Constants.Lifecycle.BreedingAgeDays then
+  local ageDays = monster and math.max(0, math.floor((os.time() - monster.BirthTimestamp) / 86400)) or 0
+  if not monster or ageDays < Constants.Lifecycle.BreedingAgeDays then
     return false
   end
 
