@@ -264,9 +264,29 @@ DO preserve MonsterID across reincarnation; preserve server authority; preserve 
 DO NOT turn combat into turn-based or primary auto-battle; do not put monsters into capture balls; do not use standard blocky Roblox avatars as monster bodies; do not create unlimited wild monsters; do not delete MonsterID after Arena defeat; do not kill monsters from hunger/thirst; do not add scheduled tournament finals unless design is explicitly changed; do not let clients decide damage, Coin, ownership or monster creation; do not copy Pokémon identity.
 
 ## Current Repository State
-This repository is a Rojo-friendly Roblox/Luau foundation. Current foundation includes default.project.json, shared constants, MonsterSchema, server Bootstrap, PopulationService, CombatService, CombatConfig, client CombatController and client CombatHUD.
+This repository is a Rojo-friendly Roblox/Luau foundation. The current pre-Studio foundation includes:
+- default.project.json
+- Shared constants, world configuration and species catalog
+- Monster identity schema with lifecycle, generation and legacy fields
+- Restart-safe server-generated MonsterID
+- Population accounting and per-location wild-slot limits
+- Player account registration and Starter Hold reservation
+- Server-side MonsterService with species validation, age tracking and Wild → Owned capture
+- WorldService for authoritative wild lookup
+- Server-side Genetics Engine for breeding inheritance rules
+- CombatConfig, CombatService and server-side combat action validation
+- PC combat input foundation and mobile-ready combat HUD
 
-Status: Foundation / early prototype.
+### Current development status
+**Milestone 1 foundation:** implemented as code foundation, not yet assembled into Roblox Studio.
+
+**Milestone 2 action-combat foundation:** server validation, cooldowns, energy-cost definitions and input mapping exist; actual 3D hitboxes, animations, monster rigs, parry timing, stagger and damage application still require Studio implementation.
+
+**Milestone 4 Monster Engine:** identity, species, age, status, ownership, population limits, capture rules, genetics and legacy foundations are implemented.
+
+**Not implemented yet:** persistent DataStore repository, global cross-server population coordination, egg/incubator state machine, actual breeding transaction, reincarnation transaction, 3D monster models, world spawning visuals, home/habitat, Arena matchmaking, belts, marketplace and monetization.
+
+The next pre-Studio objective is to finish the server domain layer and persistence interfaces so Roblox Studio becomes an integration/build step rather than the place where core rules are invented.
 Platform: Roblox.
 Engine: Roblox Studio / Luau.
 Project sync: Rojo-compatible.
