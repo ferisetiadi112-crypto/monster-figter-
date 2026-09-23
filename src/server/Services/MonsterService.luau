@@ -231,6 +231,7 @@ function MonsterService:MaterializeFromEgg(player, egg)
     genes.ParentA,
     genes.ParentB,
   }
+  monster.Stats = table.clone(genes.Stats or monster.Stats)
 
   monsters[monster.MonsterID] = monster
   return self:Get(monster.MonsterID)
@@ -279,6 +280,21 @@ function MonsterService:ReincarnateAsWild(monsterId, locationId)
   monster.XP = 0
   monster.Bond = 0
   monster.BreedingCount = 0
+  monster.Stats = {
+    Power = 10,
+    Defense = 10,
+    Speed = 16,
+    MaxHealth = 100,
+  }
+  monster.Care = {
+    Food = 100,
+    Water = 100,
+    LastCareUpdate = os.time(),
+  }
+  monster.Companion = {
+    Mode = "Stored",
+    HomeId = "Home",
+  }
   monster.BattleHistory = {
     Battles = 0,
     Wins = 0,
