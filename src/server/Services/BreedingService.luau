@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MonsterService = require(script.Parent.MonsterService)
 local GeneticsEngine = require(script.Parent.GeneticsEngine)
 local EggService = require(script.Parent.EggService)
+local PopulationService = require(script.Parent.PopulationService)
 
 local BreedingService = {}
 
@@ -45,3 +46,36 @@ function BreedingService:CreateEgg(player, parentAId, parentBId)
 end
 
 return BreedingService
+
+function BreedingService:HatchEgg(player, eggId)
+  local egg = EggService:Get(eggId)
+  if not egg then
+    return nil, "EggNotFound"
+  end
+
+  if egg.Status ~= "Ready" then
+    return nil, "EggNotReady"
+  end
+
+  if not PopulationService:CanMaterializeOwned() then
+    PopulationService:MoveToReserve()
+    return nil, "PopulationFullWaiting"
+  end
+
+  local hatched = EggService:Hatch(eggId)
+  if not hatched then
+    return nil, "HatchFailed"
+  end
+
+  local monster, reason = MonsterService:MaterializeFromEgg(player, hatched)
+  if not monster then
+    return nil, reason
+  end
+
+  if not PopulationService:AddOwned() then
+    return nil, "PopulationCommitFailed"
+  end
+
+  EggService:Remove(eggId)
+  return monster
+end
