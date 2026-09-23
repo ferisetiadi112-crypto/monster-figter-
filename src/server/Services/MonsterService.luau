@@ -99,9 +99,98 @@ function MonsterService:SetStatus(monsterId, status)
   if not monster then
     return false, "NotFound"
   end
+  if not MonsterSchema:IsValidStatus(status) then
+    return false, "InvalidStatus"
+  end
   monster.Status = status
   monster.UpdatedAt = os.time()
   return true
+end
+
+function MonsterService:MaterializeFromEgg(player, egg)
+  if not player or not egg or egg.Status ~= "Hatched" then
+    return nil, "InvalidHatch"
+  end
+
+  local genes = egg.Genes or {}
+  local monster = MonsterSchema.newIdentity(
+    MonsterIdService:Generate(),
+    genes.Species,
+    genes.Gender,
+    genes.Core
+  )
+
+  monster.BirthType = "Hatch"
+  monster.Rarity = "Common"
+  monster.Status = MonsterSchema.Status.OWNED
+  monster.OwnerUserId = player.UserId
+  monster.Generation = genes.Generation or 1
+  monster.Traits = table.clone(genes.Traits or {})
+  monster.Skills = table.clone(genes.Skills or {})
+  monster.Parents = {
+    genes.ParentA,
+    genes.ParentB,
+  }
+
+  monsters[monster.MonsterID] = monster
+  return self:Get(monster.MonsterID)
+end
+
+function MonsterService:RecordFallen(monsterId, reason)
+  local monster = monsters[monsterId]
+  if not monster then
+    return false, "NotFound"
+  end
+
+  monster.Status = MonsterSchema.Status.FALLEN
+  table.insert(monster.Legacy.FallenEvents, {
+    At = os.time(),
+    Reason = reason or "ArenaDefeat",
+    LifeNumber = monster.LifeNumber,
+  })
+  monster.UpdatedAt = os.time()
+  return true
+end
+
+function MonsterService:ReincarnateAsWild(monsterId, locationId)
+  local monster = monsters[monsterId]
+  if not monster or monster.Status ~= MonsterSchema.Status.FALLEN then
+    return nil, "NotReincarnatable"
+  end
+
+  local oldLife = {
+    LifeNumber = monster.LifeNumber,
+    OwnerUserId = monster.OwnerUserId,
+    AgeDays = monster.AgeDays,
+    Level = monster.Level,
+    ArenaWins = monster.BattleHistory.ArenaWins,
+    FallenAt = os.time(),
+  }
+
+  table.insert(monster.Legacy.PreviousLives, oldLife)
+  if monster.OwnerUserId then
+    table.insert(monster.Legacy.PreviousOwners, monster.OwnerUserId)
+  end
+
+  monster.LifeNumber += 1
+  monster.ReincarnationCount += 1
+  monster.BirthTimestamp = os.time()
+  monster.Level = 1
+  monster.XP = 0
+  monster.Bond = 0
+  monster.BreedingCount = 0
+  monster.BattleHistory = {
+    Battles = 0,
+    Wins = 0,
+    ArenaWins = 0,
+  }
+  monster.OwnerUserId = nil
+  monster.LocationId = locationId
+  monster.Status = MonsterSchema.Status.WILD
+  monster.BirthType = "Reincarnation"
+  monster.UpdatedAt = os.time()
+
+  return self:Get(monsterId)
 end
 
 function MonsterService:IncrementBreedingCount(monsterId)
