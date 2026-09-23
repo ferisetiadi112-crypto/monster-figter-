@@ -2,6 +2,17 @@
 
 > Build. Train. Evolve. Fight. Become a Legend.
 
+### Studio Prototype v0.1
+
+The project now includes the first playable 3D prototype layer for Roblox Studio:
+- procedural prototype ground and simple trees;
+- original Pyroxi prototype companion model;
+- server-side companion follow behavior;
+- PC and touch combat action bindings for Attack, Dodge, Parry, Skill 1-3, and Ultimate;
+- existing server-authoritative CombatService remains the authority for action validation.
+
+This prototype is intentionally visual and lightweight. The next Studio pass should replace procedural placeholder geometry with authored monster rigs, animations, hitboxes, camera/HUD presentation, and the first explorable location.
+
 ## Game Identity
 Monster Fighter is an original Roblox 3D action-adventure game about discovering, capturing, raising, breeding, training and fighting small original monsters in a living, controlled ecosystem.
 
