@@ -83,4 +83,20 @@ function EggService:GetAll()
   return result
 end
 
+function EggService:Hydrate(records)
+  for _, record in ipairs(records or {}) do
+    if type(record) == "table" and type(record.EggID) == "string" then
+      eggs[record.EggID] = table.clone(record)
+    end
+  end
+end
+
+function EggService:ClearForPlayer(userId)
+  for id, egg in pairs(eggs) do
+    if egg.OwnerUserId == userId then
+      eggs[id] = nil
+    end
+  end
+end
+
 return EggService
