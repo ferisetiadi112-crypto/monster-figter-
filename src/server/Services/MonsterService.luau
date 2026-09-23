@@ -150,6 +150,14 @@ function MonsterService:Train(monsterId, equipment)
     end
     monster.XP -= required
     monster.Level += 1
+    if monster.Stats then
+      monster.Stats.Power += 1
+      monster.Stats.Defense += 1
+      monster.Stats.MaxHealth += 4
+      if monster.Level % 3 == 0 then
+        monster.Stats.Speed += 1
+      end
+    end
     levelsGained += 1
   end
 
