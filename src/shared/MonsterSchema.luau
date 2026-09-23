@@ -11,6 +11,8 @@ MonsterSchema.Status = {
 }
 
 function MonsterSchema.newIdentity(monsterId, species, gender, core)
+  local timestamp = os.time()
+
   return {
     MonsterID = monsterId,
     Species = species,
@@ -23,15 +25,15 @@ function MonsterSchema.newIdentity(monsterId, species, gender, core)
 
     LifeNumber = 1,
     ReincarnationCount = 0,
+    Generation = 1,
 
-    BirthTimestamp = os.time(),
+    BirthTimestamp = timestamp,
     AgeDays = 0,
     Level = 1,
     XP = 0,
-
-    BreedingCount = 0,
     Bond = 0,
 
+    BreedingCount = 0,
     Skills = {},
     Traits = {},
     Parents = nil,
@@ -42,10 +44,26 @@ function MonsterSchema.newIdentity(monsterId, species, gender, core)
       ArenaWins = 0,
     },
 
+    Legacy = {
+      PreviousOwners = {},
+      PreviousLives = {},
+      FallenEvents = {},
+    },
+
     OwnerUserId = nil,
-    CreatedAt = os.time(),
-    UpdatedAt = os.time(),
+    LocationId = nil,
+    CreatedAt = timestamp,
+    UpdatedAt = timestamp,
   }
+end
+
+function MonsterSchema:IsValidStatus(status)
+  for _, value in pairs(self.Status) do
+    if value == status then
+      return true
+    end
+  end
+  return false
 end
 
 return MonsterSchema
