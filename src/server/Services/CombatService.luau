@@ -97,9 +97,21 @@ function CombatService:Regenerate(player, deltaTime)
   end
 end
 
+function CombatService:GetCombatStats(monster)
+  local stats = monster and monster.Stats or CombatConfig.DefaultStats
+  return {
+    Power = tonumber(stats.Power) or CombatConfig.DefaultStats.Power,
+    Defense = tonumber(stats.Defense) or CombatConfig.DefaultStats.Defense,
+    Speed = tonumber(stats.Speed) or CombatConfig.DefaultStats.Speed,
+    MaxHealth = tonumber(stats.MaxHealth) or CombatConfig.DefaultStats.MaxHealth,
+  }
+end
+
 function CombatService:CalculateDamage(attacker, defender, skill, options)
-  local power = tonumber(attacker and attacker.Power) or CombatConfig.DefaultStats.Power
-  local defense = tonumber(defender and defender.Defense) or CombatConfig.DefaultStats.Defense
+  local attackerStats = self:GetCombatStats(attacker)
+  local defenderStats = self:GetCombatStats(defender)
+  local power = attackerStats.Power
+  local defense = defenderStats.Defense
   local action = skill or {}
   local modifier = tonumber(action.Multiplier) or 1
   local comboCount = tonumber(options and options.ComboCount) or 1
@@ -112,7 +124,9 @@ function CombatService:CalculateDamage(attacker, defender, skill, options)
 end
 
 function CombatService:RollCritical(attacker, luck)
-  local chance = clamp(CombatConfig.Critical.BaseChance + (tonumber(luck) or 0), 0, 1)
+  local stats = self:GetCombatStats(attacker)
+  local speedBonus = math.max(0, stats.Speed - CombatConfig.DefaultStats.Speed) * 0.0025
+  local chance = clamp(CombatConfig.Critical.BaseChance + speedBonus + (tonumber(luck) or 0), 0, 1)
   return math.random() < chance
 end
 
