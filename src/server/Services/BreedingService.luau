@@ -29,8 +29,18 @@ function BreedingService:CreateEgg(player, parentAId, parentBId)
     os.time() + player.UserId
   )
 
-  local egg = EggService:Create(parentA.MonsterID, parentB.MonsterID, genes)
+  -- Reserve both breeding uses before creating the egg.
+  local aOk, aReason = MonsterService:IncrementBreedingCount(parentA.MonsterID)
+  if not aOk then
+    return nil, aReason
+  end
 
+  local bOk, bReason = MonsterService:IncrementBreedingCount(parentB.MonsterID)
+  if not bOk then
+    return nil, bReason
+  end
+
+  local egg = EggService:Create(parentA.MonsterID, parentB.MonsterID, genes)
   return egg
 end
 
