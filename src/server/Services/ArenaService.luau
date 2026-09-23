@@ -70,6 +70,31 @@ function ArenaService:ValidateChallenge(tier, monster)
   return true
 end
 
+function ArenaService:ResolveMatch(tier, winnerPlayer, winnerMonster, loserPlayer, loserMonster, defeatedHolder)
+  local ok, result = self:RecordWin(tier, winnerPlayer, winnerMonster, defeatedHolder)
+  if not ok then
+    return false, result
+  end
+
+  local stake = self:GetStake(tier)
+  local payout = stake * 2
+
+  if loserMonster and loserMonster.MonsterID == winnerMonster.MonsterID then
+    return false, "InvalidParticipants"
+  end
+
+  return true, {
+    Tier = tier,
+    StakePerPlayer = stake,
+    Pot = payout,
+    WinnerUserId = winnerPlayer.UserId,
+    WinnerMonsterId = winnerMonster.MonsterID,
+    LoserUserId = loserPlayer and loserPlayer.UserId or nil,
+    LoserMonsterId = loserMonster and loserMonster.MonsterID or nil,
+    Belt = result,
+  }
+end
+
 function ArenaService:RecordWin(tier, player, monster, defeatedHolder)
   if not belts[tier] or not player or not monster then
     return false, "InvalidResult"
