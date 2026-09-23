@@ -104,6 +104,21 @@ function MonsterService:SetStatus(monsterId, status)
   return true
 end
 
+function MonsterService:IncrementBreedingCount(monsterId)
+  local monster = monsters[monsterId]
+  if not monster then
+    return false, "NotFound"
+  end
+
+  if not self:CanBreed(monsterId) then
+    return false, "BreedingLimit"
+  end
+
+  monster.BreedingCount += 1
+  monster.UpdatedAt = os.time()
+  return true
+end
+
 function MonsterService:CanTrain(monsterId)
   local monster = monsters[monsterId]
   return monster ~= nil and monster.AgeDays >= Constants.Lifecycle.TrainingAgeDays
