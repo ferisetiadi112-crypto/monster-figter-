@@ -5,6 +5,7 @@ local MonsterSchema = require(ReplicatedStorage.Shared.MonsterSchema)
 local MonsterIdService = require(script.Parent.MonsterIdService)
 local PopulationService = require(script.Parent.PopulationService)
 local SpeciesConfig = require(ReplicatedStorage.Shared.SpeciesConfig)
+local TrainingConfig = require(ReplicatedStorage.Shared.TrainingConfig)
 
 local MonsterService = {}
 
@@ -111,6 +112,55 @@ function MonsterService:Capture(player, monsterId)
   monster.UpdatedAt = os.time()
 
   return true, self:Get(monsterId)
+end
+
+function MonsterService:Train(monsterId, equipment)
+  local monster = monsters[monsterId]
+  if not monster then
+    return false, "NotFound"
+  end
+  if monster.Status ~= MonsterSchema.Status.OWNED then
+    return false, "NotOwned"
+  end
+  if not self:CanTrain(monsterId) then
+    return false, "TrainingLocked"
+  end
+
+  local profile = TrainingConfig.Equipment[equipment or "Basic"]
+  if not profile then
+    return false, "InvalidEquipment"
+  end
+
+  local care = monster.Care or {Food = 100, Water = 100}
+  if care.Food < profile.FoodCost or care.Water < profile.WaterCost then
+    return false, "InsufficientCare"
+  end
+
+  monster.XP += profile.XP
+  monster.Bond = math.clamp(monster.Bond + profile.Bond, 0, TrainingConfig.MaxBond)
+  care.Food = math.max(0, care.Food - profile.FoodCost)
+  care.Water = math.max(0, care.Water - profile.WaterCost)
+  monster.Care = care
+
+  local levelsGained = 0
+  while monster.Level < TrainingConfig.MaxLevel do
+    local required = TrainingConfig:GetXPRequired(monster.Level)
+    if monster.XP < required then
+      break
+    end
+    monster.XP -= required
+    monster.Level += 1
+    levelsGained += 1
+  end
+
+  monster.UpdatedAt = os.time()
+  return true, {
+    Monster = self:Get(monsterId),
+    Equipment = equipment or "Basic",
+    XPGained = profile.XP,
+    BondGained = profile.Bond,
+    LevelsGained = levelsGained,
+  }
 end
 
 function MonsterService:SetCare(monsterId, food, water)
