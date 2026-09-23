@@ -67,6 +67,14 @@ function EggService:Hatch(eggId)
   return table.clone(egg)
 end
 
+function EggService:Remove(eggId)
+  if not eggs[eggId] then
+    return false, "NotFound"
+  end
+  eggs[eggId] = nil
+  return true
+end
+
 function EggService:GetAll()
   local result = {}
   for _, egg in pairs(eggs) do
