@@ -282,9 +282,9 @@ This repository is a Rojo-friendly Roblox/Luau foundation. The current pre-Studi
 
 **Milestone 2 action-combat foundation:** server validation, cooldowns, energy-cost definitions and input mapping exist; actual 3D hitboxes, animations, monster rigs, parry timing, stagger and damage application still require Studio implementation.
 
-**Milestone 4 Monster Engine:** identity, species, age, status, ownership, population limits, capture rules, genetics and legacy foundations are implemented.
+**Milestone 4 Monster Engine:** identity, species, age, status, ownership, population limits, capture rules, genetics, breeding, eggs, hatch and reincarnation foundations are implemented.
 
-**Not implemented yet:** production DataStore session/locking layer, global cross-server population coordination, cross-server population reconciliation, 3D monster models, world spawning visuals, home/habitat, Arena matchmaking, belts, marketplace and monetization.
+**Not implemented yet:** full runtime hydration of saved monsters/eggs into the in-memory domain registry, transactional DataStore writes for every economy/lifecycle mutation, global cross-server population coordination, cross-server population reconciliation, 3D monster models, world spawning visuals, home/habitat, Arena matchmaking, belts, marketplace and monetization.
 
 The next pre-Studio objective is to finish the server domain layer and persistence interfaces so Roblox Studio becomes an integration/build step rather than the place where core rules are invented.
 Platform: Roblox.
@@ -301,3 +301,17 @@ That lifecycle is a core identity of the game.
 
 ## Repository
 https://github.com/ferisetiadi112-crypto/monster-figter-
+## Persistence Architecture
+Persistence is server-authoritative and separated from gameplay domain services.
+
+Flow:
+PlayerAdded → Session Lock → Load Snapshot → Runtime Domain → Mutations → Snapshot → DataStore Save → Session Release.
+
+The current implementation includes:
+- versioned player data (`MonsterFighter_Player_v2`)
+- session lock with expiring token
+- load/save service
+- snapshot builder
+- basic schema validation/default recovery
+
+The next persistence hardening step is runtime hydration and atomic transaction handling for every important mutation.
