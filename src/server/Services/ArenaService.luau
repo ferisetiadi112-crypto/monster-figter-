@@ -2,6 +2,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Constants = require(ReplicatedStorage.Shared.Constants)
 local MonsterSchema = require(ReplicatedStorage.Shared.MonsterSchema)
+local TransactionService = require(script.Parent.TransactionService)
+local EconomyService = require(script.Parent.EconomyService)
+local SettlementJournal = require(script.Parent.SettlementJournal)
 
 local ArenaService = {}
 local belts = {}
@@ -68,6 +71,41 @@ function ArenaService:ValidateChallenge(tier, monster)
   end
 
   return true
+end
+
+function ArenaService:SettleMatch(result)
+  if type(result) ~= "table" then
+    return false, "InvalidResult"
+  end
+
+  local winnerId = result.WinnerUserId
+  local loserId = result.LoserUserId
+  local stake = math.floor(tonumber(result.StakePerPlayer) or 0)
+  if not winnerId or not loserId or stake <= 0 then
+    return false, "InvalidSettlement"
+  end
+
+  local settlementId = SettlementJournal:Create("Arena", result)
+  local winnerTx = TransactionService:NewId("ARENA")
+  local loserTx = TransactionService:NewId("ARENA")
+
+  local loserDebit, debitReason = EconomyService:DebitCoins(loserId, stake, loserTx)
+  if not loserDebit then
+    SettlementJournal:Fail(settlementId, debitReason)
+    return false, debitReason
+  end
+
+  local winnerCredit, creditReason = EconomyService:CreditCoins(winnerId, stake * 2, winnerTx)
+  if not winnerCredit then
+    SettlementJournal:Fail(settlementId, creditReason)
+    return false, "SettlementPendingRecovery"
+  end
+
+  SettlementJournal:Complete(settlementId)
+  return true, {
+    SettlementId = settlementId,
+    WinnerBalance = winnerCredit,
+  }
 end
 
 function ArenaService:ResolveMatch(tier, winnerPlayer, winnerMonster, loserPlayer, loserMonster, defeatedHolder)
