@@ -314,4 +314,6 @@ The current implementation includes:
 - snapshot builder
 - basic schema validation/default recovery
 
-The next persistence hardening step is runtime hydration and atomic transaction handling for every important mutation.
+Runtime hydration, 60-second autosave and server-shutdown save are implemented. The remaining hardening step is durable atomic transaction/idempotency storage for important cross-server economy and lifecycle mutations.
+
+`TransactionService` provides server-side transaction IDs and duplicate-request protection as a foundation for marketplace, breeding and Arena settlement.
