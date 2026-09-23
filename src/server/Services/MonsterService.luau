@@ -24,7 +24,7 @@ function MonsterService:CreateWild(species, gender, core, locationId)
   assert(assertCore(core), "Invalid core")
   assert(type(locationId) == "string" and locationId ~= "", "Invalid location")
 
-  if not PopulationService:CanCreateWild() then
+  if not PopulationService:CanCreateWild(locationId) then
     return nil, "PopulationLimit"
   end
 
@@ -40,7 +40,7 @@ function MonsterService:CreateWild(species, gender, core, locationId)
   monster.LocationId = locationId
 
   monsters[monster.MonsterID] = monster
-  PopulationService:RegisterWild()
+  if not PopulationService:RegisterWild(locationId) then\n    return nil, "WildSlotUnavailable"\n  end
 
   return table.clone(monster)
 end
